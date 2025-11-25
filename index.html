@@ -389,9 +389,19 @@
             const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {
                 const grayscale = data[i];
-                data[i] = grayscale * (color[0] / 255);
-                data[i + 1] = grayscale * (color[1] / 255);
-                data[i + 2] = grayscale * (color[2] / 255);
+                
+                // --- Bắt đầu phần sửa đổi ---
+                if (grayscale > 0) { // Chỉ tô màu cho các pixel không phải màu đen
+                    data[i] = color[0];      // Đặt R bằng R mục tiêu
+                    data[i + 1] = color[1];  // Đặt G bằng G mục tiêu
+                    data[i + 2] = color[2];  // Đặt B bằng B mục tiêu
+                } else {
+                    // Giữ nguyên màu đen (grayscale = 0)
+                    data[i] = 0;
+                    data[i + 1] = 0;
+                    data[i + 2] = 0;
+                }
+                // --- Kết thúc phần sửa đổi ---
             }
             ctx.putImageData(imageData, 0, 0);
             const colorizedImage = new Image();
