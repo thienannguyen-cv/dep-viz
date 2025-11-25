@@ -382,6 +382,33 @@
             await Promise.all(imageLoadPromises);
         }
         
+        // Hàm Colormap đơn giản: Ánh xạ giá trị từ 0-255 thành một màu RGB
+        // (Đây là ví dụ Colormap từ Đen -> Đỏ -> Vàng -> Trắng)
+        function intensityToColor(intensity) {
+            let r = 0, g = 0, b = 0;
+            const v = intensity / 255.0; // Chuẩn hóa về 0.0 - 1.0
+        
+            // Màu đen (0) -> Đỏ (0.5) -> Vàng (1.0) -> Trắng
+            if (v <= 0.5) {
+                // Đen -> Đỏ
+                r = Math.round(v * 2 * 255);
+            } else if (v <= 0.75) {
+                // Đỏ -> Vàng
+                r = 255;
+                g = Math.round((v - 0.5) * 4 * 255);
+            } else {
+                // Vàng -> Trắng
+                r = 255;
+                g = 255;
+                b = Math.round((v - 0.75) * 4 * 255);
+            }
+            
+            // Nếu bạn muốn một Colormap khác (ví dụ Colormap Jet: Xanh dương -> Lục -> Vàng -> Đỏ), 
+            // bạn sẽ thay đổi logic này.
+        
+            return [r, g, b];
+        }
+        
         function colorizeImage(image, color, ctx) {
             ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
             ctx.drawImage(image, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -389,11 +416,10 @@
             const data = imageData.data;
             for (let i = 0; i < data.length; i += 4) {
                 const grayscale = data[i];
-                
-                // Logic Tinting (đã khôi phục)
-                data[i] = grayscale * (color[0] / 255);
-                data[i + 1] = grayscale * (color[1] / 255);
-                data[i + 2] = grayscale * (color[2] / 255);
+                const newColor = intensityToColor(grayscale);
+                data[i] = newColor[0];      // R
+                data[i + 1] = newColor[1];  // G
+                data[i + 2] = newColor[2];  // B
                 
                 // *** THÊM DÒNG NÀY ĐỂ BUỘC ALPHA LÀ 255 ***
                 data[i + 3] = 255; 
